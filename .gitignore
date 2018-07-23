@@ -1,8 +1,4 @@
-/vendor
-composer.phar
+.idea
 composer.lock
-.DS_Store
-Thumbs.db
-/phpunit.xml
-/.idea
-/.vscode
+*.log
+thinkphp
