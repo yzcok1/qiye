@@ -1,10 +1,12 @@
 <?php
 namespace app\index\controller;
+use think\Controller;
 
-class Index
+class Index extends Controller
 {
     public function index()
     {
-		return 123;
+		$this->assign('show','123');
+		return $this->fetch();
     }
 }
