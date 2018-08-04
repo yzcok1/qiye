@@ -1,133 +1,345 @@
-ThinkPHP 5.0
+Use ThinkPHP 5.0 create restful api
 ===============
 
-[![Total Downloads](https://poser.pugx.org/topthink/think/downloads)](https://packagist.org/packages/topthink/think)
-[![Latest Stable Version](https://poser.pugx.org/topthink/think/v/stable)](https://packagist.org/packages/topthink/think)
-[![Latest Unstable Version](https://poser.pugx.org/topthink/think/v/unstable)](https://packagist.org/packages/topthink/think)
-[![License](https://poser.pugx.org/topthink/think/license)](https://packagist.org/packages/topthink/think)
 
-ThinkPHP5在保持快速开发和大道至简的核心理念不变的同时，PHP版本要求提升到5.4，对已有的CBD模式做了更深的强化，优化核心，减少依赖，基于全新的架构思想和命名空间实现，是ThinkPHP突破原有框架思路的颠覆之作，其主要特性包括：
+## 通过使用ThinkPHP来创建Restful风格API，实现移动端，服务端分离CS架构
 
- + 基于命名空间和众多PHP新特性
- + 核心功能组件化
- + 强化路由功能
- + 更灵活的控制器
- + 重构的模型和数据库类
- + 配置文件可分离
- + 重写的自动验证和完成
- + 简化扩展机制
- + API支持完善
- + 改进的Log类
- + 命令行访问支持
- + REST支持
- + 引导文件支持
- + 方便的自动生成定义
- + 真正惰性加载
- + 分布式环境支持
- + 更多的社交类库
+* 工具：Wampserver、ThinkPHP v5.0.10、CA证书、Postman、Navicat
+* 工具下载地址：[百度网盘下载](https://pan.baidu.com/s/1WDi2yApUyqxazGtLSaEcGQ '百度网盘') 密码：zqd0
+* 使用方法： 
+```
+git clone git@github.com:RiversCoder/tp5-api.git
+cd tp5-api
+```
 
-> ThinkPHP5的运行环境要求PHP5.4以上。
+### API编写前的相关配置(参数过滤)
 
-详细开发文档参考 [ThinkPHP5完全开发手册](http://www.kancloud.cn/manual/thinkphp5)
+* 在applicaton/route.php中配置路由：实现api二级域名访问指定模块; 配置域名参数简写风格
+* 在api模块的Common.php中配置公共方法：
+    1. 验证请求时间戳是否过期
+    2. 验证token是否匹配
+    3. 验证参数是否合理
 
-## 目录结构
+* 在调用的控制器方法内(例如：User)，继承Common类
+* 涉及具体url参数的定义，可以查阅application目录下route.php文件
 
-初始的目录结构如下：
+### 验证码接口API
 
-~~~
-www  WEB部署目录（或者子目录）
-├─application           应用目录
-│  ├─common             公共模块目录（可以更改）
-│  ├─module_name        模块目录
-│  │  ├─config.php      模块配置文件
-│  │  ├─common.php      模块函数文件
-│  │  ├─controller      控制器目录
-│  │  ├─model           模型目录
-│  │  ├─view            视图目录
-│  │  └─ ...            更多类库目录
-│  │
-│  ├─command.php        命令行工具配置文件
-│  ├─common.php         公共函数文件
-│  ├─config.php         公共配置文件
-│  ├─route.php          路由配置文件
-│  ├─tags.php           应用行为扩展定义文件
-│  └─database.php       数据库配置文件
-│
-├─public                WEB目录（对外访问目录）
-│  ├─index.php          入口文件
-│  ├─router.php         快速测试文件
-│  └─.htaccess          用于apache的重写
-│
-├─thinkphp              框架系统目录
-│  ├─lang               语言文件目录
-│  ├─library            框架类库目录
-│  │  ├─think           Think类库包目录
-│  │  └─traits          系统Trait目录
-│  │
-│  ├─tpl                系统模板目录
-│  ├─base.php           基础定义文件
-│  ├─console.php        控制台入口文件
-│  ├─convention.php     框架惯例配置文件
-│  ├─helper.php         助手函数文件
-│  ├─phpunit.xml        phpunit配置文件
-│  └─start.php          框架入口文件
-│
-├─extend                扩展类库目录
-├─runtime               应用的运行时目录（可写，可定制）
-├─vendor                第三方类库目录（Composer依赖库）
-├─build.php             自动生成定义文件（参考）
-├─composer.json         composer 定义文件
-├─LICENSE.txt           授权说明文件
-├─README.md             README 文件
-├─think                 命令行入口文件
-~~~
+* 创建Code类（继承Common类）实现创建验证码
+* 判断用户输入的邮箱或者手机号，匹配数据库，判断是否已经存在
+* 检测用户的输入信息，配合TP自带的检测机制完成检测结果，确认用户输入的是邮箱或者是手机号
+* 如果是邮箱，则将该验证码发送至用户输入的邮箱地址
+* 如果是手机号，则将该验证码发送至用户的手机
+* 验证接口路由配置：Route::get('code/:time/:token/:username/:is_exist', 'code/get_code')
 
-> router.php用于php自带webserver支持，可用于快速测试
-> 切换到public目录后，启动命令：php -S localhost:8888  router.php
-> 上面的目录结构和名称是可以改变的，这取决于你的入口文件和配置参数。
+* 调用参考： 
+1. api.movi.com/code/11/1/13368669852/0
+```js
+{
+    "code": 200,
+    "msg": "手机验证码发送成功，每天发送5次，请在一分钟内验证！",
+    "data": []
+}  
+```  
+2. api.movi.com/code/11/1/88888888@qq.com/0
+```js
+{
+    "code": 200,
+    "msg": "验证码发送成功，请注意查收！",
+    "data": []
+}
+```      
 
-## 命名规范
+### 用户注册接口API
 
-`ThinkPHP5`遵循PSR-2命名规范和PSR-4自动加载规范，并且注意如下规范：
+* 接口路由：Route::post('user/register', 'user/register')
+* 用该用户名(手机/邮箱)获取验证码，然后用这个用户名该调用该接口，才会匹配上验证码
+* url请求(POST) : api.movi.com/user/register
+* post参数：user_name 、 user_pwd、code
+    
+    | user_name | user_pwd | code | 
+    | :-: | :-: | :-: | 
+    | string | string| int | 
+    | 用户名 | 用户密码 | 验证码 | 
+* 返回数据参考:
+```js
+{
+    "code": 200,
+    "msg": "用户注册成功！",
+    "data": []
+}
+```
 
-### 目录和文件
+### 用户登陆接口API
 
-*   目录不强制规范，驼峰和小写+下划线模式均支持；
-*   类库、函数文件统一以`.php`为后缀；
-*   类的文件名均以命名空间定义，并且命名空间的路径和类库文件所在路径一致；
-*   类名和类文件名保持一致，统一采用驼峰法命名（首字母大写）；
+* 接口路由：Route::post('user/login', 'user/login')
+* url请求(POST) : api.movi.com/user/login
+* post参数：user_name 、 user_pwd
 
-### 函数和类、属性命名
+    | time | token | user_name | user_pwd |
+    | :-: | :-: | :-: | :-: |
+    | int | int | string | string|
+    | 时间戳 | 验证身份 | 用户名 | 用户密码 |
 
-*   类的命名采用驼峰法，并且首字母大写，例如 `User`、`UserType`，默认不需要添加后缀，例如`UserController`应该直接命名为`User`；
-*   函数的命名使用小写字母和下划线（小写字母开头）的方式，例如 `get_client_ip`；
-*   方法的命名使用驼峰法，并且首字母小写，例如 `getUserName`；
-*   属性的命名使用驼峰法，并且首字母小写，例如 `tableName`、`instance`；
-*   以双下划线“__”打头的函数或方法作为魔法方法，例如 `__call` 和 `__autoload`；
+* 返回数据参考:
 
-### 常量和配置
+```js
+{
+    "code": 200,
+    "msg": "登陆成功！",
+    "data": {
+        "user_id": 3,
+        "user_phone": "",
+        "user_name": "",
+        "user_email": "1569853706@qq.com",
+        "user_rtime": 1522822718
+    }
+}
+```
 
-*   常量以大写字母和下划线命名，例如 `APP_PATH`和 `THINK_PATH`；
-*   配置参数以小写字母和下划线命名，例如 `url_route_on` 和`url_convert`；
+### 用户上传头像接口API
 
-### 数据表和字段
+* 接口路由：Route::post('user/icon', 'user/uploadHeadImg')
+* url请求(POST) : api.movi.com/user/icon
+* post参数：
 
-*   数据表和字段采用小写加下划线方式命名，并注意字段名不要以下划线开头，例如 `think_user` 表和 `user_name`字段，不建议使用驼峰和中文作为数据表字段命名。
 
-## 参与开发
+    | time | token | user_id | user_icon |
+    | :-: | :-: | :-: | :-: |
+    | int | int | int | object |
+    | 时间戳 | 验证身份 | 用户id | 上传的图片资源 |
 
-请参阅 [ThinkPHP5 核心框架包](https://github.com/top-think/framework)。
+* 返回数据参考:
 
-## 版权信息
+```js
+{
+    "code": 200,
+    "msg": "上传头像成功",
+    "data": "/uploads/20180405/efa4c44b4dae92c092f66b4384f787d3.jpg"
+}
+``` 
 
-ThinkPHP遵循Apache2开源协议发布，并提供免费使用。
+### 用户修改密码接口API
 
-本项目包含的第三方源码和二进制文件之版权信息另行标注。
+* 接口路由：Route::post('user/change_pwd', 'user/changePwd')
+* url请求(POST) : api.movi.com/user/change_pwd
+* post参数：
 
-版权所有Copyright © 2006-2018 by ThinkPHP (http://thinkphp.cn)
 
-All rights reserved。
+    | time | token | user_name | user_old_pwd | user_pwd |
+    | :-: | :-: | :-: | :-: | :-: |
+    | int | int | string | string | string |
+    | 时间戳 | 验证身份 | 用户名 | 旧密码 | 新密码 |
 
-ThinkPHP® 商标和著作权所有者为上海顶想信息科技有限公司。
+* 返回数据参考:
 
-更多细节参阅 [LICENSE.txt](LICENSE.txt)
+```js
+{
+    "code": 200,
+    "msg": "密码修改成功!",
+    "data": []
+}
+``` 
+
+### 用户找回密码接口API
+
+* 接口路由：Route::post('user/find_pwd', 'user/findPwd')
+* url请求(POST) : api.movi.com/user/find_pwd
+* post参数：
+
+
+    | time | token | user_name | user_pwd | code |
+    | :-: | :-: | :-: | :-: | :-: |
+    | int | int | string | string | int |
+    | 时间戳 | 验证身份 | 用户名 | 新密码 | 验证码 |
+
+* 返回数据参考:
+
+```js
+{
+    "code": 200,
+    "msg": "密码修改成功!",
+    "data": []
+}
+``` 
+
+
+### 用户绑定邮箱/手机接口API
+
+* 接口路由：Route::post('user/bind_phone_email', 'user/bindPhoneEmail')
+* url请求(POST) : api.movi.com/user/bind_phone_email
+* post参数：
+
+
+    | time | token | user_name | user_id | code |
+    | :-: | :-: | :-: | :-: | :-: |
+    | int | int | string | int | int |
+    | 时间戳 | 验证身份 | 要绑定的手机号/邮箱 | 用户ID | 验证码 |
+
+* 返回数据参考:
+
+```js
+{
+    "code": 200,
+    "msg": "绑定邮箱成功！",
+    "data": []
+}
+``` 
+
+### 用户设置昵称接口API
+
+* 接口路由：Route::post('user/nickname', 'user/modifyUsername')
+* url请求(POST) : api.movi.com/user/nickname
+* post参数：
+
+
+    | time | token | user_nickname | user_id |
+    | :-: | :-: | :-: | :-: |
+    | int | int | string | int |
+    | 时间戳 | 验证身份 | 昵称 | 用户ID |
+
+* 返回数据参考:
+
+```js
+{
+    "code": 200,
+    "msg": "昵称设置成功！",
+    "data": []
+}
+``` 
+
+### 新增文章接口API
+
+* 接口路由：Route::post('article', 'article/addArticle')
+* url请求(POST) : api.movi.com/article
+* post参数： * 表示必须字段
+
+
+    | time | token | article_uid | article_title | artcle_ctime | article_content |
+    | :-: | :-: | :-: | :-: | :-: | :-: |
+    | int | int | int |  string | int | string |
+    | *时间戳 | *验证身份 | *用户ID | *文章标题 | *发布时间 | 文章内容 |
+
+* 返回数据参考: (data为文章的id)
+
+```js
+{
+    "code": 200,
+    "msg": "新增文章成功！",
+    "data": "5" 
+}
+``` 
+
+### 文章列表接口API
+
+* 接口路由：Route::get('articles/:time/:token/:user_id/[:num]/[:page]', 'article/getArticles')
+* url请求(GET) : api.movi.com/articles/1/1/2/2/1
+* post参数： * 表示必须字段
+
+
+    | time | token | user_id | num | page |
+    | :-: | :-: | :-: | :-: | :-: |
+    | int | int | int |  int | int |
+    | *时间戳 | *验证身份 | *用户ID | 查询条数 | 查询页数 |
+
+* 返回数据参考: 
+
+```js
+{
+    "code": 200,
+    "msg": "查询成功！",
+    "data": {
+        "articles": [
+            {
+                "article_id": 1,
+                "article_ctime": 1523030209,
+                "article_title": "太平洋战争",
+                "user_nickname": "cici"
+            },
+            {
+                "article_id": 2,
+                "article_ctime": 1523030405,
+                "article_title": "太平洋战争",
+                "user_nickname": "cici"
+            }
+        ],
+        "page_num": 4
+    }
+}
+``` 
+
+### 获取文章详情接口API
+
+* 接口路由：Route::get('article/:time/:token/:article_id', 'article/articleDetail')
+* url请求(GET) : api.movi.com/article/1/1/8
+* post参数： * 表示必须字段
+
+
+    | time | token | article_id |
+    | :-: | :-: | :-: |
+    | int | int | int |
+    | *时间戳 | *验证身份 | *文章ID |
+
+* 返回数据参考: 
+
+```js
+{
+    "code": 200,
+    "msg": "查询成功！",
+    "data": {
+        "article_id": 8,
+        "article_ctime": 1523159078,
+        "article_title": "那年那月",
+        "article_content": "<script>console.log('风华雪月，大漠孤烟直!')</script>",
+        "user_nickname": "cici"
+    }
+}
+``` 
+
+### 修改文章接口API
+
+* 接口路由：Route::put('article', 'article/updateArticle')
+* url请求(PUT) : api.movi.com/article
+* put参数： * 表示必须字段  * x-www-form-urlencoded
+
+
+    | time | token | article_id | article_title | article_content |
+    | :-: | :-: | :-: | :-: | :-: |
+    | int | int | int | string | string |
+    | *时间戳 | *验证身份 | *文章ID | 文章标题 | 文章内容 |
+
+* 返回数据参考: 
+
+```js
+{
+    "code": 200,
+    "msg": "修改文章成功!",
+    "data": []
+}
+``` 
+
+### 删除文章接口API
+
+* 接口路由：Route::delete('article', 'article/deleteArticle')
+* url请求(PUT) : api.movi.com/article
+* put参数： * 表示必须字段  * x-www-form-urlencoded
+
+
+    | time | token | article_id | 
+    | :-: | :-: | :-: |
+    | int | int | int |
+    | *时间戳 | *验证身份 | *文章ID |
+
+* 返回数据参考: 
+
+```js
+{
+    "code": 200,
+    "msg": "删除文章成功!",
+    "data": []
+}
+``` 
+
+
+
+> 欢迎关注我的个人博客 ： [小青蛙的博客](http://blog.sina.com.cn/riversfrog '小青蛙的博客')
