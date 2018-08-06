@@ -88,13 +88,13 @@ class Code extends Common
         $mail->CharSet = 'utf8';
         $mail->Host = 'smtp.163.com';
         $mail->SMTPAuth = true;
-        $mail->Username = "lgc928091232@163.com";
-        $mail->Password = "movi103103";
+        $mail->Username = "yzcok1@163.com";
+        $mail->Password = "y123456";
         $mail->SMTPSecure = 'ssl';
         $mail->Port = 994;
-        $mail->setFrom('lgc928091232@163.com', 'movi');
+        $mail->setFrom('yzcok1@163.com', 'qiye');
         $mail->addAddress($toemail, '您好！');
-        $mail->addReplyTo('lgc928091232@163.com', 'Replay');
+        $mail->addReplyTo('yzcok1@163.com', 'Replay');
         $mail->Subject = "您有新的验证码!";
         $mail->Body = "您的验证码时" . $code . "，验证码的有效期为600秒，本邮件请勿回复！";
 
@@ -114,19 +114,55 @@ class Code extends Common
      */
     private function sendCodeToPhone($phone, $code)
     {
-        $submail = new MESSAGEXsend();
-        $submail->setTo($phone);
-        $submail->SetProject('FoJ494');
-        $submail->AddVar('time', 600);
-        $submail->AddVar('code', $code);
-        $xsend = $submail->xsend();
+       
+    $host = "http://yzxyzm.market.alicloudapi.com";
+    $path = "/yzx/verifySms";
+    $method = "POST";
+    $appcode = "2ae84563cf264582b1fec5b61b2da66b";
+    $headers = array();
+    array_push($headers, "Authorization:APPCODE " . $appcode);
+    $querys = "phone=$phone&templateId=TP18040314&variable=$code";
+    $bodys = "";
+    $url = $host . $path . "?" . $querys;
 
-        //判断返回结果
-        if ($xsend['status'] !== 'success') {
-            $this->returnMsg(400, $xsend['msg']);
-        } else {
-            $this->returnMsg(200, '手机验证码发送成功，每天发送5次，请在十分钟内验证！');
-        }
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($curl, CURLOPT_FAILONERROR, false);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HEADER, true);
+    if (1 == strpos("$".$host, "https://"))
+    {
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    }
+    var_dump(curl_exec($curl)); 
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://api.mysubmail.com/message/xsend');
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_POST, 1);
+    $data = [
+        'appid'   => '15180',
+        'to'      => $phone,
+        'project' => '9CTTG2',
+        'vars'    => '{"code":' . $code . ',"time":"60"}',
+        'signature'=>'76a9e82484c83345b7850395ceb818fb',
+    ];
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    $res = curl_exec($curl);
+    curl_close($curl);
+    $res = json_decode($res);
+    return($res).'123';
+    if ($res->status != 'success') {
+        $this->return_msg(400,$res->msg);
+    }else{
+        $this->return_msg(200,'手机验证码已发送, 每天发送5次, 请在一分钟内验证!');
+    }
+    dump($res->staus);die;
+
     }
 
     /**
