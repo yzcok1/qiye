@@ -97,7 +97,7 @@ class Common extends Controller {
 
 		//2. 验证token
 		//$this->checkToken($this->req->param());
-
+        //$this->checkToken($this->req->except('time,is_exist'));
 		//3. 验证参数,返回成功过滤后的参数数组
 		$this->params = $this->checkParams($this->req->param(true));
 
@@ -110,7 +110,7 @@ class Common extends Controller {
 		if (!isset($arr['time']) || intval($arr['time']) <= 1) {
 			$this->returnMsg(400, '时间戳不存在!');
 		}
-		if (time() - intval($arr['time']) > 10) {
+		if (time() - intval($arr['time']) > 60) {
 			$this->returnMsg(400, '请求超时!');
 		}
 	}
@@ -134,7 +134,9 @@ class Common extends Controller {
 
 		$session_token = '';
 		foreach ($arr as $key => $val) {
+			//echo $val.'</br>';
 			$session_token .= md5($val);
+			//echo $session_token =md5($val).'</br>';
 		}
 
 		$session_token = md5('api_' . $session_token . '_api');
@@ -155,6 +157,7 @@ class Common extends Controller {
 	protected function checkParams($arr) {
 
 		//1.获取验证规则 (Array)
+        
 		$rule = $this->rules[$this->req->controller()][$this->req->action()];
 
 		//2. 验证参数并且返回错误

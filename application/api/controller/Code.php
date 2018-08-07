@@ -46,10 +46,10 @@ class Code extends Common
         /* 检测手机号/邮箱是否存在与数据库 */
         $this->checkExist($username, $type, $exist);
 
-        /* 检测验证码请求频率 30秒一次 */
+        /* 检测验证码请求频率 60秒一次 */
         if (session($username . '_last_send_time')) {
-            if (time() - session($username . '_last_send_time') < 30) {
-                $this->returnMsg(400, $type_name . '验证码，每30s只能发送一次');
+            if (time() - session($username . '_last_send_time') < 60) {
+                $this->returnMsg(400, $type_name . '验证码，每60s只能发送一次');
             }
         }
 
@@ -115,13 +115,15 @@ class Code extends Common
     private function sendCodeToPhone($phone, $code)
     {
        
-    $host = "http://yzxyzm.market.alicloudapi.com";
+    $host = "yzxyzm.market.alicloudapi.com";
     $path = "/yzx/verifySms";
     $method = "POST";
-    $appcode = "2ae84563cf264582b1fec5b61b2da66b";
+    $appcode = "13b170695dd143e6bd2ff75f2fe735a2";
     $headers = array();
     array_push($headers, "Authorization:APPCODE " . $appcode);
-    $querys = "phone=$phone&templateId=TP18040314&variable=$code";
+    $querys='phone='.$phone.'&templateId=TP18040314&variable=code%3A'.$code;
+    echo $querys.'</br>';
+    //$querys = "phone=150xxxxxxxx&templateId=TP18040314&variable=code%3A000000";
     $bodys = "";
     $url = $host . $path . "?" . $querys;
 
@@ -131,37 +133,22 @@ class Code extends Common
     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($curl, CURLOPT_FAILONERROR, false);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_HEADER, true);
+    curl_setopt($curl, CURLOPT_HEADER, false);
     if (1 == strpos("$".$host, "https://"))
     {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     }
-    var_dump(curl_exec($curl)); 
-
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, 'https://api.mysubmail.com/message/xsend');
-    curl_setopt($curl, CURLOPT_HEADER, 0);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_POST, 1);
-    $data = [
-        'appid'   => '15180',
-        'to'      => $phone,
-        'project' => '9CTTG2',
-        'vars'    => '{"code":' . $code . ',"time":"60"}',
-        'signature'=>'76a9e82484c83345b7850395ceb818fb',
-    ];
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    //var_dump(curl_exec($curl)); die;
     $res = curl_exec($curl);
     curl_close($curl);
-    $res = json_decode($res);
-    return($res).'123';
-    if ($res->status != 'success') {
-        $this->return_msg(400,$res->msg);
-    }else{
-        $this->return_msg(200,'手机验证码已发送, 每天发送5次, 请在一分钟内验证!');
-    }
-    dump($res->staus);die;
+    $res = json_decode($res); 
+    if ($res->return_code !== '00000') {
+            $this->returnMsg(400, '手机验证码发送失败！');
+        } else {
+            $this->returnMsg(200, '手机验证码发送成功，请在十分钟内验证！');
+        }
+    
 
     }
 
