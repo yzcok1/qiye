@@ -39,7 +39,7 @@ Route::post('user/bind_phone_email', 'user/bindPhoneEmail');
 Route::post('user/nickname', 'user/modifyUsername');
 
 //配置添加文章请求路径
-Route::post('article/add', 'article/addArticle');
+Route::post('article', 'Article/addArticle');
 
 //配置文章列表请求路径
 Route::get('articles/:time/:token/:user_id/[:num]/[:page]', 'article/getArticles');

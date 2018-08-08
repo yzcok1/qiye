@@ -5,6 +5,11 @@ namespace app\api\controller;
 class Article extends Common
 {
 
+   public function index()
+    {
+        return 'index.php/Index/index';
+    }
+    
     public $datas;
 
     /**

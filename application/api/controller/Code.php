@@ -122,7 +122,7 @@ class Code extends Common
     $headers = array();
     array_push($headers, "Authorization:APPCODE " . $appcode);
     $querys='phone='.$phone.'&templateId=TP18040314&variable=code%3A'.$code;
-    echo $querys.'</br>';
+    //echo $querys.'</br>';
     //$querys = "phone=150xxxxxxxx&templateId=TP18040314&variable=code%3A000000";
     $bodys = "";
     $url = $host . $path . "?" . $querys;

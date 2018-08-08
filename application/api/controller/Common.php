@@ -50,22 +50,22 @@ class Common extends Controller {
 			),
 		),
 		'Article' => array(
-			'addArticle' => array(
+			'addarticle' => array(
 				'article_title' => ['require', 'chsDash'],
 				'article_uid' => ['require', 'number'],
 			),
-			'getArticles' => array(
+			'getarticles' => array(
 				'user_id' => ['require', 'number'],
 				'num' => ['number'],
 				'page' => ['number'],
 			),
-			'articleDetail' => array(
+			'articledetail' => array(
 				'article_id' => ['require', 'number'],
 			),
-			'updateArticle' => array(
+			'updatearticle' => array(
 				'article_id' => ['require', 'number'],
 			),
-			'deleteArticle' => array(
+			'deletearticle' => array(
 				'article_id' => ['require', 'number'],
 			),
 		),
@@ -81,6 +81,9 @@ class Common extends Controller {
 				'is_exist' => 'require|number|length:1',
 			),
 		),
+        'Index'=>array(
+
+        )
 	);
 
 	/**
@@ -95,9 +98,10 @@ class Common extends Controller {
 		//1. 检车请求时间是否超时
 		//$this->checkTime($this->req->only(['time']));
 
-		//2. 验证token
+		//2. 验证token，包含所有输入变量
 		//$this->checkToken($this->req->param());
-        //$this->checkToken($this->req->except('time,is_exist'));
+        //过滤time和is_exist
+		//$this->checkToken($this->req->except('time,is_exist'));
 		//3. 验证参数,返回成功过滤后的参数数组
 		$this->params = $this->checkParams($this->req->param(true));
 
@@ -157,9 +161,9 @@ class Common extends Controller {
 	protected function checkParams($arr) {
 
 		//1.获取验证规则 (Array)
-        
+        //return $this->rules[$this->req->controller()];die;
 		$rule = $this->rules[$this->req->controller()][$this->req->action()];
-
+        //$rule = $this->rules['Article']['addArticle'];
 		//2. 验证参数并且返回错误
 		$this->validater = new Validate($rule);
 
@@ -266,9 +270,12 @@ class Common extends Controller {
 		$return_data['code'] = $code;
 		$return_data['msg'] = $msg;
 		$return_data['data'] = $data;
-
-		echo json_encode($return_data);die;
+		//echo json_encode($return_data);die;
+		//输出json格式，过滤中文
+        echo json_encode($return_data, JSON_UNESCAPED_UNICODE);die;
 	}
+
+	
 
 	/**
 	 * [上传文件到服务器]

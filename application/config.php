@@ -25,7 +25,7 @@ return [
     // 是否支持多模块
     'app_multi_module' => true,
     // 入口自动绑定模块
-    'auto_bind_module' => false,
+    'auto_bind_module' => true,
     // 注册的根命名空间
     'root_namespace' => [],
     // 扩展函数文件
@@ -101,7 +101,7 @@ return [
     // 域名根，如thinkphp.cn
     'url_domain_root' => '',
     // 是否自动转换URL中的控制器和操作名
-    'url_convert' => true,
+    'url_convert' => false,
     // 默认的访问控制器层
     'url_controller_layer' => 'controller',
     // 表单请求类型伪装变量

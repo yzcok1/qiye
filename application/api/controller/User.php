@@ -4,7 +4,6 @@ namespace app\api\controller;
 
 class User extends Common
 {
-
     public $datas;
 
     /*------------------ 接口方法 -------------------*/
